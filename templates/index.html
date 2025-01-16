@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Suggestly Music</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+
+<body>
+    <div class="container">
+        <h1>Suggestly</h1>
+        <p>Type a Song Name to get suggestions:</p>
+
+        <input type="text" id="musicInput" placeholder="Enter a music title" oninput="fetchSuggestions()">
+        <div id="suggestions" style="border: 1px solid #ccc; max-height: 200px; overflow-y: auto; display: none;">
+            <!-- Suggestions will be dynamically added here -->
+        </div>
+        
+        
+        <button onclick="getMusicRecommendations()">Get Suggestions</button>
+        <div id="musicRecommendations"></div>
+    </div>
+
+    <script>
+        async function fetchSuggestions() {
+            const input = document.getElementById("musicInput").value;
+            const suggestionsDiv = document.getElementById("suggestions");
+            if (input.trim() === "") {
+                suggestionsDiv.style.display = "none";
+                return;
+            }
+
+            const response = await fetch(`/get_titles?q=${encodeURIComponent(input)}`);
+            const data = await response.json();
+
+            if (data.titles && data.titles.length > 0) {
+                suggestionsDiv.innerHTML = data.titles.map(title => 
+                    `<div id="suggest-${title}" onclick="selectSuggestion('${title}')">${title}</div>`
+                ).join('');
+                suggestionsDiv.style.display = "block";
+            } else {
+                suggestionsDiv.innerHTML = "<p>No suggestions found.</p>";
+                suggestionsDiv.style.display = "block";
+            }
+        }
+
+
+        function selectSuggestion(title) {
+            document.getElementById("musicInput").value = title;
+            document.getElementById("suggestions").style.display = "none";
+        }
+
+
+        async function getMusicRecommendations() {
+            const musicTitle = document.getElementById("musicInput").value;
+            const response = await fetch("/recommend_music", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ music_title: musicTitle })
+            });
+
+            const data = await response.json();
+            const recommendationsDiv = document.getElementById("musicRecommendations");
+
+            if (data.recommendations) {
+                recommendationsDiv.innerHTML = `<h2>Recommendations:</h2>
+                    <div class="recommendations-container">${
+                        data.recommendations.map(music => `
+                            <div class="game-card">
+                                <p>${music.title}</p>
+                            </div>
+                        `).join('')
+                    }</div>`;
+            } else {
+                recommendationsDiv.innerHTML = "<p>No recommendations found.</p>";
+            }
+        }
+    </script>
+</body>
+</html>
