@@ -22,7 +22,7 @@ def recommend_music():
         return jsonify({"recommendations": []})
     
     recommendations = music_recommender.recommend(music_title)
-    return jsonify({"recommendations": [{"title": rec[0], "poster": rec[1]} for rec in recommendations]})
+    return jsonify({"recommendations": [{"title": rec.title()} for rec in recommendations]})
 
 @app.route("/get_titles", methods=["GET"])
 def get_titles():
@@ -34,6 +34,7 @@ def get_titles():
         matching_titles = (
             music_df[music_df['title'].str.lower().str.contains(query, case=False, na=False)]['title']
             .head(10)
+            .str.title()
             .tolist()
         )
 

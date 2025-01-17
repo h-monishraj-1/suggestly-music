@@ -16,7 +16,7 @@ class MusicRecommender:
 
             recommended_songs = []
             for i in music_list:
-                song_title = self.music_df.iloc[i[0]]['title'].title()
+                song_title = self.music_df.iloc[i[0]]['title']
                 recommended_songs.append(song_title)
         
             return recommended_songs
